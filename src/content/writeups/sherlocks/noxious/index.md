@@ -24,6 +24,7 @@ order: 11
 
 - Scroll down and see that:
     - ![image](./img-03.png)
+      <span class="caption">Further on, the rogue host 172.17.79.135 opens an RDP connection whose `mstshash` cookie names `john.deacon`, the account whose hash was captured.</span>
 
 
 
@@ -72,10 +73,12 @@ john.deacon::FORELA:601019d191f054f1:c0cc803a6d9fb5a9082253a04dbd4cd4:0101000000
 - Let's use this cmd `hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt.gz`
 - And we have
     - ![image](./img-11.png)
+      <span class="caption">hashcat's output: the recovered password is the last field of the cracked NetNTLMv2 line, after the final colon.</span>
 
 
 ## T9: Just to get more context surrounding the incident, what is the actual file share that the victim was trying to navigate to?
 - ![image](./img-12.png)
+  <span class="caption">An SMB2 Tree Connect from the victim (172.17.79.136) to the DC shows the share it actually meant to open: `\\DC01\DC-Confidential`.</span>
 
 ## Detection & mitigation
 

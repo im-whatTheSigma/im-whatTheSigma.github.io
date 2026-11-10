@@ -17,6 +17,7 @@ order: 3
 - Let's go thru them one by one and we see that in the 2nd entry there is a file name that is pretty sus, let's paste this to virustotal and check:
     - ![image](./img-02.png)
     - ![image](./img-03.png)
+      <span class="caption">VirusTotal on the hash of `Fattura 2 2024.exe`: 51 of 71 vendors flag it, labelled `trojan.winvnc`, the backdoored UltraVNC dropper.</span>
 - bingo
 
 ## T3: Which Cloud drive was used to distribute the malware?
@@ -37,6 +38,7 @@ order: 3
 
 ## T6: The malicious file attempted to reach a dummy domain, most likely to check the internet connection status. What domain name did it try to connect to?
 - ![image](./img-08.png)
+  <span class="caption">Sysmon Event 22 (DNS query) from `Preventivo24.02.14.exe`: it looked up `www.example.com`, the dummy domain used as an internet connectivity check. The resolved addresses are listed underneath.</span>
 - What i did is just ctrl+f for `www.`
 
 ## T7: Which IP address did the malicious process try to reach out to?

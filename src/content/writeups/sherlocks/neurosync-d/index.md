@@ -10,19 +10,24 @@ order: 16
 ## T1: What version of Next.js is the application using?
 - In interface.log
     - ![image](./img-01.png)
+      <span class="caption">The top of `interface.log`: `next dev` starting the app, with the banner giving the version, Next.js 15.1.0.</span>
 
 
 ## T2: What local port is the Next.js-based application running on?
 - ![image](./img-02.png)
+  <span class="caption">The same startup banner shows the app listening on `http://localhost:3000`.</span>
 
 ## T3: A critical Next.js vulnerability was released in March 2025, and this version appears to be affected. What is the CVE identifier for this vulnerability?
 - ![image](./img-03.png)
+  <span class="caption">Searching for that version leads to CVE-2025-29927, published on NVD on 21 March 2025: the Next.js middleware authorization bypass.</span>
 
 ## T4: The attacker tried to enumerate some static files that are typically available in the Next.js framework, most likely to retrieve its version. What is the first file he could get?
 - ![image](./img-04.png)
+  <span class="caption">In the access log, the attacker's requests for `framework.js`, `main.js` and `commons.js` return 404; `main-app.js` is the first static file that returns 200.</span>
 - Note that it is not the top 3 because 404 error
 ## T5: Then the attacker appears to have found an endpoint that is potentially affected by the previously identified vulnerability. What is that endpoint?
 - ![image](./img-05.png)
+  <span class="caption">Straight after the static files, the attacker starts requesting `/api/bci/analytics` and gets 401s back: the endpoint guarded by the middleware.</span>
 
 ## T6: How many requests to this endpoint have resulted in an "Unauthorized" response?
 - Know that "Unauthorized" is error 401, just ctrl+f for 401 and we see that there are 5
@@ -38,13 +43,16 @@ order: 16
 
 ## T9: The attacker chained the vulnerability with an SSRF attack, which allowed them to perform an internal port scan and discover an internal API. On which port is the API accessible?
 - ![image](./img-08.png)
+  <span class="caption">The data API's startup log: the internal analytics server runs on port 4000, the port the SSRF scan turned up.</span>
 
 
 ## T10: After the port scan, the attacker starts a brute-force attack to find some vulnerable endpoints in the previously identified API. Which vulnerable endpoint was found?
 - ![image](./img-09.png)
+  <span class="caption">Requests reaching the internal API from `127.0.0.1` with `curl/7.88.1`: the attacker brute-forcing paths (`/cart`, `/inventory`, `/files`, …) through the SSRF. Most are noise; the one that matters comes after `/logs`.</span>
 - We see that there is a lot of red herrings, however scrolling down we can see that after `/logs` the attacker starts initiating a path traversal attack, so `/logs` must be the answer
 ## T11: When the vulnerable endpoint found was used maliciously for the first time?
 - ![image](./img-10.png)
+  <span class="caption">The first malicious `/logs` request: `logFile=/var/log/../.../...//../.../...//etc/passwd`. The app's "sanitising" turns it into `/var/log/../../etc/passwd`, which still escapes the log directory. Its timestamp answers T11.</span>
 
 
 ## T12: What is the attack name the endpoint is vulnerable to?
@@ -54,11 +62,13 @@ order: 16
 ## T13: What is the name of the file that was targeted the last time the vulnerable endpoint was exploited?
 
 - ![image](./img-11.png)
+  <span class="caption">The last traversal request reads `/tmp/secret.key`.</span>
 
 
 ## T14: Finally, the attacker uses the sensitive information obtained earlier to create a special command that allows them to perform Redis injection and gain RCE on the system. What is the command string?
 
 - ![image](./img-12.png)
+  <span class="caption">In the Redis log, the attacker pushes `OS_EXEC|<base64>|<hash>` onto the `bci_commands` list. The middle field is the base64 command decoded in T15; the trailing hash looks like a signature made with the stolen `secret.key`.</span>
 
 
 ## T15: Once decoded, what is the command?

@@ -17,6 +17,7 @@ order: 14
 - Let's go to the SECURITY logs and filter for logs that appear AFTER the previous problem's time, which is 2024/5/14 11:42:16, we then immediately see 2 groups being enumerated by DC01$, so that is the answer
     - ![image](./img-02.png)
     - ![image](./img-03.png)
+      <span class="caption">Event 4799 in Chinese-localised Event Viewer: the subject is `DC01$`, the group enumerated is `BUILTIN\Administrators`, and the process is `VSSVC.exe` with process ID `0x1190`.</span>
 
 ## T3: Identify the Process ID (in Decimal) of the volume shadow copy service process.
 - Let us stay on the SECURITY logs, and we filter for EventID == 4799 because it shows the PID of different processes in hex
@@ -39,6 +40,7 @@ order: 14
 
 - On the same page:
     - ![image](./img-07.png)
+      <span class="caption">MFT Explorer on the dumped hive: the file is called `SYSTEM`, with a physical size of `0x10C0000` bytes, converted to decimal below.</span>
 - We also see it is called SYSTEM and there is a physical size of 0x10C0000, this is equal to 17563648
 
 ## Detection & mitigation

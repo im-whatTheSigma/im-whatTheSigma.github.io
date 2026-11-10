@@ -9,19 +9,24 @@ order: 1
 
 ## T1: What is the IP Address for Forela-Wkstn001?
 - ![image](./img-01.png)
+  <span class="caption">Frame 3: 172.17.79.129 sends an NBNS Refresh registering the name `FORELA-WKSTN001`, so that's the workstation's IP.</span>
     - This is the source asking via NBNS for a refresh 
 ## T2: What is the IP Address for Forela-Wkstn002?
 - ![image](./img-02.png)
+  <span class="caption">The same NBNS refreshes from 172.17.79.136 register `FORELA-WKSTN002`.</span>
     - Same of the prev prob
 ## T3: What is the username of the account whose hash was stolen by attacker?
 - ![image](./img-03.png)
+  <span class="caption">Security event 4624 in Chinese-localised Event Viewer: logon type 3 (network) for `FORELA\arthur.kyle`, logon ID `0x64A799`. That's the stolen account.</span>
     - We see that all other logon events all have logon type 5, which are services, only this has 3 which means via internet logon, so this might be an attack
 ## T4: What is the IP Address of Unknown Device used by the attacker to intercept credentials?
 - ![image](./img-04.png)
+  <span class="caption">172.17.79.135 sends NBSTAT name queries to every other host but never registers a name of its own: the unknown device.</span>
     - Look at the .135 source, there is literally no hostname, it might be a machine set up by an attacker to eardrop on the credentials
 ## T5: What was the fileshare navigated by the victim user account?
 - See fileshare -> filter for smb2
 - ![image](./img-05.png)
+  <span class="caption">Further down the same 4624 event, the network section: the logon claims to come from workstation `FORELA-WKSTN002`, but the source address is the rogue host's. That hostname/IP mismatch is what the detection flagged.</span>
 - We know that arthur.kyle, the victim logged onto FORELA-WKSTN002, and the ip is .136, so we can also filter for this as the source
     - ![image](./img-06.png)
 
@@ -39,9 +44,11 @@ order: 1
 
 ## T9: At what UTC time did the the malicious logon happen?
 - ![image](./img-08.png)
+  <span class="caption">The event's Logged time, 2024/7/31 12:55:16 PM (下午 = PM). The machine displays UTC+8, hence subtracting 8 hours for UTC.</span>
     - Remember to -8 hours cause we are in UTC+8
 ## T10: What is the share Name accessed as part of the authentication process by the malicious tool used by the attacker?
 - ![image](./img-09.png)
+  <span class="caption">Event 5140 (network share accessed) from 172.17.79.135, source port 40252: the share is `\\*\IPC$`, which tools touch while authenticating.</span>
 
 ## Detection & mitigation
 

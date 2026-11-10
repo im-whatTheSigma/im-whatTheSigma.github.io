@@ -12,23 +12,28 @@ order: 15
 
 ## T2: Examine the Zone Identifier contents for the initially downloaded ZIP file. This field reveals the HostUrl from where the file was downloaded, serving as a valuable Indicator of Compromise (IOC) in our investigation/analysis. What is the full Host URL from where this ZIP file was downloaded?
 - ![image](./img-01.png)
+  <span class="caption">The ZIP's `Zone.Identifier` stream: `ZoneId=3` (the Internet zone) and the `HostUrl` it came from, a Google Cloud Storage download link.</span>
 
 
 
 ## T3: What is the full path and name of the malicious file that executed malicious code and connected to a C2 server?
 - ![image](./img-02.png)
+  <span class="caption">MFT Explorer's Parent Path column for the stager: it sits in `Downloads\Stage-20240213T093324Z-001\Stage\invoice\invoices`, inside the extracted phishing ZIP.</span>
 - File name is invoices.bat so just put that after
 
 
 ## T4: Analyze the $Created0x30 timestamp for the previously identified file. When was this file created on disk?
 - ![image](./img-03.png)
+  <span class="caption">The `$FILE_NAME` (0x30) attribute's Created On value for the stager, 2024-02-13 16:38:39. It's the timestamp malware has a harder time faking than the `$STANDARD_INFORMATION` one.</span>
 
 
 ## T5: Finding the hex offset of an MFT record is beneficial in many investigative scenarios. Find the hex offset of the stager file from Question 3.
 - ![image](./img-04.png)
+  <span class="caption">The record header for the stager: `Offset: 0x16E3000` is where its MFT record starts inside `$MFT`.</span>
 
 ## T6: Each MFT record is 1024 bytes in size. If a file on disk has smaller size than 1024 bytes, they can be stored directly on MFT File itself. These are called MFT Resident files. During Windows File system Investigation, its crucial to look for any malicious/suspicious files that may be resident in MFT. This way we can find contents of malicious files/scripts. Find the contents of The malicious stager identified in Question3 and answer with the C2 IP and port.
 - ![image](./img-05.png)
+  <span class="caption">The stager is small enough to be MFT-resident, so its contents live inside the record itself: a PowerShell download cradle that fetches from `43.204.110.203:6666`.</span>
 
 ## Detection & mitigation
 

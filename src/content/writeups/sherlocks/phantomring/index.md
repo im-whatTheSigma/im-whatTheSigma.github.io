@@ -61,6 +61,7 @@ order: 10
 ## T10: What is the full path of the first tracing file the agent attempts to disable?
 - Another simple search
     - ![image](./img-08.png)
+      <span class="caption">Right after the agent's "disconnecting and exiting" string, `strings` lists the tracing files it tampers with; the first one is `/sys/kernel/debug/tracing/tracing_on`.</span>
 
 
 ## T11: What procfs path does the agent read to find its own executable location before self-destruction?
