@@ -41,4 +41,4 @@ These started as my own HackMD notes, so they read like notes: what I tried, wha
 - GitHub: [im-whatTheSigma](https://github.com/im-whatTheSigma)
 - LinkedIn: [Jerry Tsai](https://www.linkedin.com/in/jerry-tsai-672827351/)
 - Instagram: [@never_gonna_give_piano_up](https://www.instagram.com/never_gonna_give_piano_up/)
-- Hack The Box: whaTheSigmaNTU
+- Hack The Box: [whaTheSigmaNTU](https://app.hackthebox.com/users/2262931)
