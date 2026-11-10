@@ -12,17 +12,6 @@ order: 1
 (Remember to first connect to the "Machine" VPN!)
 - Let's still start with `nmap -sC -sV 10.129.9.71`, however we can also check the machine info part, where it seems we need to exploit CraftCMS and telnetd, where CraftCMS is a content management system for web, thus we already know that gobuster can be used later to try to enumerate paths
     - ![image](./img-01.png)
-
-    ```bash
-    nmap -sC -sV 10.129.9.71
-    ```
-
-    ```
-    PORT   STATE SERVICE VERSION
-    22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.15 (Ubuntu Linux; protocol 2.0)
-    80/tcp open  http    nginx 1.18.0 (Ubuntu)
-    |_http-title: Did not follow redirect to http://orion.htb/
-    ```
     - http is open, but direct connection thru the browser fails, so we do mapping in /etc/hosts: add `[ip]     orion.htb` inside the file and we can visit now
     - Scroll down to double check this web is powered by CraftCMS
 - So now we do `gobuster dir -u http://orion.htb/  -w /usr/share/wordlists/dirb/common.txt` to try to find directories

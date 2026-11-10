@@ -15,21 +15,6 @@ order: 4
 ## User Flag
 - Recon:
     - ![image](./img-01.png)
-
-```bash
-nmap -sC -sV 10.129.55.9
-```
-
-```
-PORT    STATE SERVICE VERSION
-22/tcp  open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.18 (Ubuntu Linux; protocol 2.0)
-80/tcp  open  http    nginx 1.18.0 (Ubuntu)
-|_http-title: Did not follow redirect to https://airsnacks.htb/
-443/tcp open  ssl/http nginx 1.18.0 (Ubuntu)
-|_http-title: Welcome \xC2\xB7 AirSnacks Self-Checkout
-|_ssl-cert: Subject: commonName=airsnacks.htb
-```
-
 - We see that the web servers are open, add the redirection to `/etc/hosts` and visit
 
     ```bash
@@ -216,7 +201,6 @@ EOF
 ```
 (the contents here actually ddo not matter cause even if it aborts our command already ran)
 - Then, `/tmp/rootbash -p` starts bash with the bit preserved, so we are root.
-
 
 - ![image](./img-25.png)
 

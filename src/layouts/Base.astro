@@ -49,7 +49,22 @@ const pages = (await getPages()).filter((p) => p.data.nav);
     </main>
     <footer class="colophon">
       <span>&copy; {new Date().getFullYear()} {site.handle}</span>
+      <span class="visits" data-src={site.visitBadge}></span>
       <span aria-hidden="true">EOF</span>
     </footer>
+    <script>
+      // Site-wide visit counter (hits.sh). Each page load on the live site adds one;
+      // local previews are skipped so they don't inflate the number.
+      const slot = document.querySelector<HTMLElement>('.visits');
+      if (slot?.dataset.src && location.hostname.endsWith('.github.io')) {
+        const img = new Image();
+        img.src = slot.dataset.src;
+        img.alt = 'Total page visits';
+        img.height = 20;
+        img.decoding = 'async';
+        img.onerror = () => img.remove();
+        slot.append(img);
+      }
+    </script>
   </body>
 </html>

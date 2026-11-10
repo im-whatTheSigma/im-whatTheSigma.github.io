@@ -13,17 +13,6 @@ order: 2
 
 - We always start with a port scan:
     - ![image](./img-01.png)
-
-```bash
-nmap -sC -sV 10.129.17.63
-```
-
-```
-PORT     STATE SERVICE VERSION
-22/tcp   open  ssh     OpenSSH 9.6p1 Ubuntu 3ubuntu13.16 (Ubuntu Linux; protocol 2.0)
-3000/tcp open  http    Next.js   # X-Powered-By: Next.js, x-nextjs-cache headers
-```
-
 - We see that for port 3000 it is open and can establish HTTP requests, so we also first do mapping in `/etc/hosts` and connect to `[ip]:3000` (note that we do not use the open SSH port because we have no creds)
 - There is a webpage:
     - ![image](./img-02.png)

@@ -13,17 +13,6 @@ order: 1
 ## User Flag
 - Recon: (needs -Pn) (ignore my weird sequence)
     - ![image](./img-01.png)
-
-```bash
-nmap -sC -sV -Pn -p- 10.129.37.192
-```
-
-```
-PORT     STATE SERVICE       VERSION
-22/tcp   open  ssh           OpenSSH 9.6p1 Ubuntu 3ubuntu13.19 (Ubuntu Linux; protocol 2.0)
-3389/tcp open  ms-wbt-server Microsoft Terminal Service
-```
-
 - Hmm, nothing interesting other than 22 and 3389
 - We see that port 3389 is open, (which is RDP), thus we do `xfreerdp ....` with the provided creds
     - ![image](./img-02.png)

@@ -13,18 +13,6 @@ order: 5
 ## User Flag
 - Recon:
     - ![image](./img-01.png)
-
-```bash
-nmap -sC -sV -p- 10.129.56.205
-```
-
-```
-PORT   STATE SERVICE VERSION
-22/tcp open  ssh     OpenSSH 10.0p2 Debian 7+deb13u4 (protocol 2.0)
-80/tcp open  http    nginx
-|_http-title: Book a Seat, See the World - HTB Airways Booking
-```
-
 - We are greeted with this webpage:
     - ![image](./img-02.png)
 - Enumerating the directories to see if we find anything
@@ -140,8 +128,6 @@ func encode(j string) []byte {
 	gob.NewEncoder(&buf).Encode(&v)
 	return buf.Bytes()
 }
-
-
 
 func sign(key, body []byte) []byte {
 	m := hmac.New(sha256.New, key); m.Write(body); return m.Sum(nil)

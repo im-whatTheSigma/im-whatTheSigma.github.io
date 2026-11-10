@@ -15,19 +15,6 @@ order: 3
 ## User Flag
 - Recon
     - ![image](./img-01.png)
-
-```bash
-nmap -sC -sV -Pn 10.129.47.228
-```
-
-```
-PORT     STATE SERVICE VERSION
-22/tcp   open  ssh     OpenSSH 9.6p1 Ubuntu 3ubuntu13.19 (Ubuntu Linux; protocol 2.0)
-80/tcp   open  http    nginx 1.24.0 (Ubuntu)
-|_http-title: Did not follow redirect to http://api.htb-airport.htb/
-8081/tcp open  http    Uvicorn
-```
-
 - So it redirects us to `http://api.htb-airport.htb`, add to `/etc/hosts`
 - Upon inspecting the open ports, we see 2 api gateways
     - ![image](./img-02.png)
@@ -35,7 +22,6 @@ PORT     STATE SERVICE VERSION
       <span class="caption">Port 8081 describes itself: an AIDX flight-leg ingest that accepts `POST /feeds/aidx` as `application/xml`, and notes it doesn't parse anything itself (validation happens downstream). That note is the XXE hint.</span>
 - Note that we see `"Ingest...validation happens downstream"`, maybe we can do XXE? (XML External Entity injection)
     - We can try with some payloads, but I'm not sure how to do so, let's leave this here first
-
 
 - We see a `.api` before the real domain, maybe there are more vhosts? fuzz for em
     - `ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -u http://api.htb-airport.htb -H "Host: FUZZ.htb-airport.htb -fc 178"`

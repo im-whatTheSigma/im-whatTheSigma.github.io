@@ -13,18 +13,6 @@ order: 3
 ## Successful Approach-User flag
 - Let's start with the port scan:
     - ![image](./img-01.png)
-
-    ```bash
-    nmap -sC -sV 10.129.53.242
-    ```
-
-    ```
-    PORT   STATE SERVICE VERSION
-    22/tcp open  ssh     OpenSSH 10.0p2 Ubuntu 5ubuntu5.4 (Ubuntu Linux; protocol 2.0)
-    80/tcp open  http    nginx 1.28.0 (Ubuntu)
-    |_http-title: Did not follow redirect to http://paperwork.htb/
-    ```
-
     - Seems like a web service is on, let's add to `/etc/hosts` and visit
 - We see this:
     - ![image](./img-02.png)

@@ -13,21 +13,6 @@ order: 6
 ## User Flag
 - Recon:
     - ![image](./img-01.png)
-
-```bash
-nmap -sC -sV 10.129.59.72
-```
-
-```
-PORT     STATE SERVICE       VERSION
-80/tcp   open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
-|_http-title: Did not follow redirect to http://unclaimed.htb/
-135/tcp  open  msrpc         Microsoft Windows RPC
-139/tcp  open  netbios-ssn   Microsoft Windows netbios-ssn
-445/tcp  open  microsoft-ds?
-5985/tcp open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
-```
-
 - Visit the site:
     - ![image](./img-02.png)
       <span class="caption">TracerBot, an AI assistant that turns baggage questions into SQL. Even a bare `status` gets a reply about whether to run a SQL query, a hint that our text ends up driving a query.</span>

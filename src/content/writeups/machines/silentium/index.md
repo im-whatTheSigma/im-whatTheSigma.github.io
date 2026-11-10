@@ -13,18 +13,6 @@ order: 5
 
 - Let's start with enumeration:
     - ![image](./img-01.png)
-
-```bash
-nmap -sC -sV 10.129.38.208
-```
-
-```
-PORT   STATE SERVICE VERSION
-22/tcp open  ssh     OpenSSH 9.6p1 Ubuntu 3ubuntu13.15 (Ubuntu Linux; protocol 2.0)
-80/tcp open  http    nginx 1.24.0 (Ubuntu)
-|_http-title: Did not follow redirect to http://silentium.htb/
-```
-
 - We can see that there is a web page and ssh is open, instantly guess we need to somehow land our foothold via ssh
 - But first let's add this to `/etc/hosts`
     - ![image](./img-02.png)
@@ -74,7 +62,6 @@ PORT   STATE SERVICE VERSION
 - i Have some interesting files in root but i don't quite get what I can do with them, however i found out that doing `env` spits out so many info! And there is a password, maybe we try that on ben in ssh
     - ![image](./img-16.png)
 - Welp it seems like my intuition is right!
-
 
 > Lessons learnt from IppSec: If we are actually doing a pentest across a live env, we should not use so destructive "pwd change" for admins, and also see if `curl [target]` hangs AFTER we land a rev shell because if the service is single threaded we might just bring everything down!
 ## Root flag

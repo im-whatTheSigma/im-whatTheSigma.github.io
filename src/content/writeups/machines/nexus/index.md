@@ -12,18 +12,6 @@ order: 3
 ## User Flag
 - Always start with a port scan:
     - ![image](./img-01.png)
-
-```bash
-nmap -sC -sV 10.129.2.25
-```
-
-```
-PORT   STATE SERVICE VERSION
-22/tcp open  ssh     OpenSSH 9.6p1 Ubuntu 3ubuntu13.16 (Ubuntu Linux; protocol 2.0)
-80/tcp open  http    nginx 1.24.0 (Ubuntu)
-|_http-title: Did not follow redirect to http://nexus.htb/
-```
-
 - Let's add the ip to `/etc/hosts` and visit to see whats there, also do some enumeration on the directories of this website:
     - ![image](./img-02.png)
 - Nothing useful seems to appear

@@ -140,6 +140,13 @@ main {
   padding-block: var(--s5);
   border-top: 1px solid var(--rule);
   color: var(--muted);
+  align-items: center;
+  gap: var(--s4);
+}
+.colophon .visits img {
+  display: block;
+  height: 20px;
+  width: auto;
 }
 
 /* ---------- home ---------- */

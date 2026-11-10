@@ -12,18 +12,6 @@ order: 4
 ## User Flag
 - Always start with recon:
     - ![image](./img-01.png)
-
-```bash
-nmap -sC -sV 10.129.31.156
-```
-
-```
-PORT   STATE SERVICE VERSION
-22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.1 (Ubuntu Linux; protocol 2.0)
-80/tcp open  http    nginx
-|_http-title: Did not follow redirect to http://2million.htb/
-```
-
 - Add to `/etc/hosts`, we can visit the page now
 - We can now fuzz for the directories:
     - ![image](./img-02.png)
