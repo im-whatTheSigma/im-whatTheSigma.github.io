@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import Listing from '../../components/Listing.astro';
+import { href } from '../../site';
+import { getWriteups, SECTIONS, sectionOf } from '../../writeups';
+
+const writeups = await getWriteups();
+const groups = SECTIONS.map((s) => ({
+  id: s.id,
+  title: s.title,
+  href: href(`/writeups/${s.id}/`),
+  entries: writeups.filter((e) => sectionOf(e) === s.id),
+})).filter((g) => g.entries.length > 0);
+---
+
+<Base title="Writeups" description="Machine, Sherlock and challenge writeups.">
+  <header class="index-head">
+    <h1>Writeups</h1>
+    <nav class="jump" aria-label="Sections">
+      {groups.map((g) => <a href={g.href}>{g.title} <span>{g.entries.length}</span></a>)}
+    </nav>
+  </header>
+  <Listing groups={groups} />
+</Base>

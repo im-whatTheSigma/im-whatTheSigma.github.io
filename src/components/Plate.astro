@@ -1,0 +1,29 @@
+---
+// The "photograph" of a box: an xxd-style dump of its name.
+// Hovering the surrounding card decodes the bytes back to text.
+interface Props {
+  text: string;
+  max?: number;
+}
+const { text, max = 32 } = Astro.props;
+const bytes = [...new TextEncoder().encode(text)].slice(0, max);
+const rows: number[][] = [];
+for (let i = 0; i < bytes.length; i += 4) rows.push(bytes.slice(i, i + 4));
+const ascii = (b: number) => (b > 0x20 && b < 0x7f ? String.fromCharCode(b) : '.');
+---
+
+<div class="plate" aria-hidden="true">
+  {
+    rows.map((row, r) => (
+      <div class="plate-row">
+        <span class="off">{(r * 4).toString(16).padStart(4, '0')}</span>
+        {row.map((b, i) => (
+          <span class="byte" style={`--i:${r * 4 + i}`}>
+            <span class="hex">{b.toString(16).padStart(2, '0')}</span>
+            <span class="asc">{ascii(b)}</span>
+          </span>
+        ))}
+      </div>
+    ))
+  }
+</div>

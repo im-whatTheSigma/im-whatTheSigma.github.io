@@ -1,0 +1,22 @@
+---
+import Plate from './Plate.astro';
+import { href } from '../site';
+import { labels, type Writeup } from '../writeups';
+
+interface Props {
+  entry: Writeup;
+}
+const { entry } = Astro.props;
+const { title, tags, summary } = entry.data;
+const cats = labels(entry);
+const haystack = [title, ...cats, ...tags, summary ?? ''].join(' ').toLowerCase();
+---
+
+<li class="card" data-hay={haystack}>
+  <a href={href(`/writeups/${entry.id}/`)}>
+    <Plate text={title} />
+    {cats.length > 0 && <p class="cats">{cats.join(', ')}</p>}
+    <h3 class="card-title">{title}</h3>
+    {summary && <p class="card-summary">{summary}</p>}
+  </a>
+</li>

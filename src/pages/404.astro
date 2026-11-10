@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '../site';
+---
+
+<Base title="404">
+  <header class="index-head">
+    <h1>404</h1>
+  </header>
+  <p class="empty" style="text-align:center">
+    cat: {Astro.url.pathname}: No such file or directory &mdash; <a href={href('/writeups/')}>ls writeups/</a>
+  </p>
+</Base>

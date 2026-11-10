@@ -1,0 +1,55 @@
+---
+import '@fontsource/courier-prime/400.css';
+import '@fontsource/courier-prime/700.css';
+import '@fontsource-variable/source-serif-4';
+import '@fontsource-variable/source-serif-4/wght-italic.css';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import { site, href } from '../site';
+import { getPages } from '../writeups';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = site.intro } = Astro.props;
+const pageTitle = title ? `${title} · ${site.handle}` : site.handle;
+const path = Astro.url.pathname;
+const inWriteups = path.includes('/writeups/');
+const pages = (await getPages()).filter((p) => p.data.nav);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="masthead">
+      <a class="handle" href={href('/')}>{site.handle}</a>
+      <nav aria-label="Main">
+        <a href={href('/writeups/')} aria-current={inWriteups ? 'page' : undefined}>Writeups</a>
+        {
+          pages.map((p) => (
+            <a href={href(`/${p.id}/`)} aria-current={path.endsWith(`/${p.id}/`) ? 'page' : undefined}>
+              {p.data.title}
+            </a>
+          ))
+        }
+        {site.github &&<a href={site.github} rel="me">GitHub</a>}
+      </nav>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="colophon">
+      <span>&copy; {new Date().getFullYear()} {site.handle}</span>
+      <span aria-hidden="true">EOF</span>
+    </footer>
+  </body>
+</html>

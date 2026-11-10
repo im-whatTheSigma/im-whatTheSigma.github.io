@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import Card from '../components/Card.astro';
+import { site, href } from '../site';
+import { getWriteups, getPages, SECTIONS, sectionOf } from '../writeups';
+
+const writeups = await getWriteups();
+const pages = (await getPages()).filter((p) => p.data.nav);
+const dirs = SECTIONS.map((s) => ({
+  ...s,
+  count: writeups.filter((e) => sectionOf(e) === s.id).length,
+}));
+const featured = writeups.filter((e) => sectionOf(e) === 'machines').slice(0, 3);
+---
+
+<Base>
+  <section class="hello">
+    <h1>{site.handle}</h1>
+    <p>{site.intro}</p>
+  </section>
+
+  <nav class="dirs" aria-label="Site directory">
+    {
+      dirs.map((d) => (
+        <a href={href(`/writeups/${d.id}/`)}>
+          <span class="path">writeups/{d.id}/</span>
+          <span class="name">{d.title}</span>
+          <span class="blurb">{d.blurb}</span>
+          <span class="n">{d.count}</span>
+        </a>
+      ))
+    }
+    {
+      pages.map((p) => (
+        <a href={href(`/${p.id}/`)}>
+          <span class="path">{p.id}/</span>
+          <span class="name">{p.data.title}</span>
+          <span class="blurb">{p.data.description}</span>
+          <span class="n" />
+        </a>
+      ))
+    }
+  </nav>
+
+  {
+    featured.length > 0 && (
+      <section aria-labelledby="latest">
+        <div class="section-head">
+          <h2 id="latest">Recent machines</h2>
+          <a class="label" href={href('/writeups/machines/')}>All machines</a>
+        </div>
+        <ul class="cards">
+          {featured.map((entry) => (
+            <Card entry={entry} />
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</Base>

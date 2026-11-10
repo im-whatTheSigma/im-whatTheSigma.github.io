@@ -1,0 +1,30 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Listing from '../../../components/Listing.astro';
+import { href } from '../../../site';
+import { getWriteups, byCategory, SECTIONS } from '../../../writeups';
+
+export function getStaticPaths() {
+  return SECTIONS.map((section) => ({ params: { section: section.id }, props: { section } }));
+}
+
+const { section } = Astro.props;
+const entries = await getWriteups(section.id);
+const groups =
+  section.id === 'challenges' ? byCategory(entries) : [{ id: section.id, title: section.title, entries }];
+---
+
+<Base title={section.title} description={section.blurb}>
+  <header class="index-head">
+    <p class="cats"><a href={href('/writeups/')}>Writeups</a></p>
+    <h1>{section.title}</h1>
+    {
+      groups.length > 1 && (
+        <nav class="jump" aria-label="Categories">
+          {groups.map((g) => <a href={`#${g.id}`}>{g.title} <span>{g.entries.length}</span></a>)}
+        </nav>
+      )
+    }
+  </header>
+  <Listing groups={groups} />
+</Base>

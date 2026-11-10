@@ -1,0 +1,85 @@
+---
+// A filterable grid of writeup cards, optionally split into titled groups.
+import Card from './Card.astro';
+import type { Group } from '../writeups';
+
+interface Props {
+  groups: Group[];
+}
+const { groups } = Astro.props;
+const total = groups.reduce((n, g) => n + g.entries.length, 0);
+const titled = groups.length > 1;
+---
+
+<form class="grep" role="search" hidden>
+  <label for="q">$ grep -ril</label>
+  <input
+    id="q"
+    type="search"
+    placeholder="box, category, difficulty, technique"
+    autocomplete="off"
+    spellcheck="false"
+    aria-describedby="count"
+  />
+  <output id="count" for="q" aria-live="polite" data-total={total}>{total} files</output>
+</form>
+
+{
+  total === 0 ? (
+    <p class="empty">ls: nothing here yet</p>
+  ) : (
+    groups.map((g) => (
+      <section class="group" id={g.id} aria-labelledby={titled ? `h-${g.id}` : undefined}>
+        {titled && (
+          <div class="section-head">
+            <h2 id={`h-${g.id}`}>{g.href ? <a href={g.href}>{g.title}</a> : g.title}</h2>
+            <span class="label">{g.entries.length}</span>
+          </div>
+        )}
+        <ul class="cards">
+          {g.entries.map((entry) => (
+            <Card entry={entry} />
+          ))}
+        </ul>
+      </section>
+    ))
+  )
+}
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('.grep');
+  const input = document.querySelector<HTMLInputElement>('#q');
+  const count = document.querySelector<HTMLOutputElement>('#count');
+  const cards = [...document.querySelectorAll<HTMLElement>('.card')];
+  const groups = [...document.querySelectorAll<HTMLElement>('.group')];
+
+  if (form && input && count && cards.length > 0) {
+    form.hidden = false;
+    form.addEventListener('submit', (e) => e.preventDefault());
+
+    input.addEventListener('input', () => {
+      const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+      let shown = 0;
+      for (const card of cards) {
+        const hay = card.dataset.hay ?? '';
+        const match = terms.every((t) => hay.includes(t));
+        card.hidden = !match;
+        if (match) shown++;
+      }
+      for (const g of groups) g.hidden = !g.querySelector('.card:not([hidden])');
+      count.textContent = terms.length ? `${shown} of ${cards.length} match` : `${cards.length} files`;
+    });
+
+    // "/" jumps to the filter, like less and vim
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== input) {
+        e.preventDefault();
+        input.focus();
+      } else if (e.key === 'Escape' && document.activeElement === input) {
+        input.value = '';
+        input.dispatchEvent(new Event('input'));
+        input.blur();
+      }
+    });
+  }
+</script>

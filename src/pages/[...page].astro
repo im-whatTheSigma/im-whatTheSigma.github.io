@@ -1,0 +1,26 @@
+---
+// Renders every file in src/content/pages/ (about.md → /about/).
+import { render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { getPages } from '../writeups';
+
+export async function getStaticPaths() {
+  const pages = await getPages();
+  return pages.map((entry) => ({ params: { page: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Base title={entry.data.title} description={entry.data.description}>
+  <article>
+    <header class="post-head">
+      <h1>{entry.data.title}</h1>
+      {entry.data.description && <p class="summary">{entry.data.description}</p>}
+    </header>
+    <div class="prose page">
+      <Content />
+    </div>
+  </article>
+</Base>
