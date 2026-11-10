@@ -44,6 +44,7 @@ PORT     STATE SERVICE VERSION
     - ![image](./img-05.png)
 - This status seems useful:
     - ![image](./img-06.png)
+      <span class="caption">The unauthenticated status endpoint returns the device details, including its serial `NX-DH-2024-B7042`, the value that logs us in next.</span>
 - Ok, we have the serial number, maybe we can login with that
     - ![image](./img-07.png)
 - Poking around we see that we have
@@ -59,6 +60,7 @@ PORT     STATE SERVICE VERSION
 - After googling how to breakout, I found out that the browser could be used to browse local directories! `file:///C:/` cool
     - ![image](./img-13.png)
 - ![image](./img-14.png)
+  <span class="caption">The kiosk browser opens `C:/Users/KioskUser/Desktop/user.txt` straight from a `file:///` path: the user flag.</span>
 - This user flag is very interesting indeed
 
 ## Root Flag

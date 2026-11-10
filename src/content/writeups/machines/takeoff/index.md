@@ -41,6 +41,7 @@ PORT   STATE SERVICE VERSION
 - Also doesnt work, let's just use a polyglot payload and test:
     - ${{<%[%'"}}%\. ->
         - ![image](./img-08.png)
+          <span class="caption">The polyglot comes back HTML-escaped and with characters missing (`${{&lt;%[%&#39;&#34;}}%\.`). Something on the server consumed part of it, which is the tell for server-side templating.</span>
     - bingo, we got some dynamic changes -> SSTI confirmed!
 - Let's head to https://github.com/Hackmanit/template-injection-table and see which framework is this based on
 - its based on go, lets try simply {{.}} to verify
@@ -65,6 +66,7 @@ PORT   STATE SERVICE VERSION
     - ![image](./img-15.png)
 - Let's try this:
     - ![image](./img-16.png)
+      <span class="caption">`/api/check-in` answers `payload too short` / `invalid_payload`, an oracle telling us it expects a specific, longer payload: the QR data.</span>
 - An oracle AGAIN, guess we have to fill in what it wants then, im guessing its the info from the base64 decode? Cause "verifyTicketAuth" sounds like something you would do when checking-in
 - Send to Burp repeater and try:
     - ![image](./img-17.png)

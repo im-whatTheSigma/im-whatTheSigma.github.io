@@ -48,6 +48,7 @@ PORT   STATE SERVICE VERSION
 
 ## Root Flag
 - ![image](./img-10.png)
+  <span class="caption">`systemctl list-timers` shows a custom `gitea-template-sync.timer` that fires every minute. A job that runs this often is a classic privilege-escalation lead.</span>
 - See that there is a git template sync service 
     - ![image](./img-11.png)
 - I tried to modify the `.service`, or the python file itself but it seems all unwritable

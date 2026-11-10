@@ -41,6 +41,7 @@ PORT    STATE SERVICE VERSION
     - ![image](./img-03.png)
 - but its nothing useful
     - ![image](./img-04.png)
+      <span class="caption">Decoding the session cookie (a JWT) shows it only carries the cart, an item `BER-PBR-4` and a `cart_id`, so there's nothing in it worth tampering with.</span>
 - If we try to play around with the /verify endpoint, via POSTing directly to it, we get this
     - ![image](./img-05.png)
 - So maybe we can craft a valid BCBP? (also tried enumerating the directories but didnt find anything at any layers)
@@ -55,6 +56,7 @@ PORT    STATE SERVICE VERSION
 - Let's try some error based injections
     - SQLi:
         - ![image](./img-10.png)
+          <span class="caption">PostgreSQL's `COPY … TO/FROM PROGRAM` runs a shell command for superusers or any role with `pg_execute_server_program`. That's the bridge from SQL injection to command execution on the database host.</span>
         - This might be useful, lets combine the BCBP generator and this SQLi
         - ![image](./img-11.png)
         - Simple solution, just change the 88> to 89>
@@ -77,6 +79,7 @@ dutyfre+  1766  1763  tty7   /snap/firefox/8803/usr/lib/firefox/firefox --kiosk 
 - `psql -U postgres -c '\l'` we can first list the dbs
     - ![image](./img-15.png)
     - ![image](./img-16.png)
+      <span class="caption">`\dt` on the `airsnacks` database lists seven tables, all owned by `airsnacks_app`. `store_config`, `duty_rate` and `bp_scan_audit` looked the most interesting.</span>
 - Maybe `store_config` is useful?
 - However after enumerating the db nothing comes up useful.
 - Relooking at the running processes:
@@ -147,6 +150,7 @@ tap("Return")' > pwn.py
 - See that `id` we are of a group
     - ![image](./img-19.png)
 - ![image](./img-20.png)
+  <span class="caption">Searching for anything owned by the `pos-ops` group turns up `/opt/vrs/data` and `duty-rates.csv`, the group-writable rate file that the root service reads later.</span>
 - Let's check these files we have access to
     - ![image](./img-21.png)
 - Files itself is useless, but we see that a root app runs/calls this file, so if we can replace this file with a handcrafted script then we might just PE

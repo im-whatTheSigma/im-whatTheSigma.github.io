@@ -40,10 +40,12 @@ PORT   STATE SERVICE VERSION
 - ![image](./img-06.png)
 - Follow this:
     - ![image](./img-07.png)
+      <span class="caption">`POST /api/v1/invite/generate` returns an invite code marked `"format":"encoded"`. It's base64, decoded in the next step.</span>
 - It is very obvious that it is base64 encoded, so just decode that:
     - ![image](./img-08.png)
 - Great: Now we login
     - ![image](./img-09.png)
+      <span class="caption">Logged in to the retro HTB lab dashboard. The pages here (Access, the VPN connection pack) are backed by the `/api/v1` routes we poke at next.</span>
     - (seems like an old version of htb)
 - We can gather more info by visiting `/api/v1`
     - ![image](./img-10.png)

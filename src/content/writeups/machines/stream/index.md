@@ -32,6 +32,7 @@ PORT     STATE SERVICE VERSION
 - Upon inspecting the open ports, we see 2 api gateways
     - ![image](./img-02.png)
     - ![image](./img-03.png)
+      <span class="caption">Port 8081 describes itself: an AIDX flight-leg ingest that accepts `POST /feeds/aidx` as `application/xml`, and notes it doesn't parse anything itself (validation happens downstream). That note is the XXE hint.</span>
 - Note that we see `"Ingest...validation happens downstream"`, maybe we can do XXE? (XML External Entity injection)
     - We can try with some payloads, but I'm not sure how to do so, let's leave this here first
 
@@ -41,6 +42,7 @@ PORT     STATE SERVICE VERSION
         - hmm nothing shows
 - What about just directory fuzzing?
     - ![image](./img-04.png)
+      <span class="caption">Directory fuzzing on `api.htb-airport.htb` finds `/error`, `/status`, `/health` and `/actuator`. The last one is Spring Boot's management endpoint.</span>
 - o, we see a directory `actuator`
     - ![image](./img-05.png)
 - It presents a heapdump at this url, we can `curl -o ...` for the memory dumpfile
@@ -77,6 +79,7 @@ curl -s -X POST http://stream.htb:8081/feeds/aidx \
 ```
 - Replies:
     - ![image](./img-09.png)
+      <span class="caption">The ingest endpoint replies `accepted: true` and names the Kafka topic it published to, `aidx.flightleg.raw.v1`. Nothing is parsed here, so the entity only resolves further down the pipeline.</span>
 - Ok, so combining this info with the previous db query, we can see it might be stored in `flightleg.raw`
     - ![image](./img-10.png)
 - bingo, but we see, the `&xxe` is not interpreted as the command we want to inject, so maybe we are in the wrong place?
@@ -120,6 +123,7 @@ event:              {"message_type":"IATA_AIDX_FlightLegNotifRQ","version":null,
 - Tried `ps -ef --forest | less -S` but see no interesting process run by root & user can modify
 - To check running systemd services
     - ![image](./img-13.png)
+      <span class="caption">`systemctl list-timers` shows a custom `aidx-dlq-drainer.timer` that last ran 44 seconds ago and fires every couple of minutes: the root job we end up hijacking.</span>
 - We see the `aidx...` service again, `cat /etc/systemd/system/aidx...`
     - ![image](./img-14.png)
 - And if we dig deep into this python script `dlq_drainer.py` (this is the most important part for PE)
@@ -237,6 +241,7 @@ else:
 - This overwrites the FORMATTER, thus if we send a DLQ again over, it will now load our malicious FORMATTER and prints the flags inside `/tmp`
     - ![image](./img-16.png)
 - ![image](./img-17.png)
+  <span class="caption">Stream solved on 15 Oct 2026.</span>
 
 > Conclusion: Such a nasty root chain, how is this medium
 

@@ -4,7 +4,7 @@ description: "Junior at NTU IM, SOC analyst intern at Open Information Security,
 order: 1
 ---
 
-Hi, I'm Jerry, a.k.a. whathesigma.
+Hi, I'm Jerry, a.k.a. whatTheSigma.
 
 ## What I do
 

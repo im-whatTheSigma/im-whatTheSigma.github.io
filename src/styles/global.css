@@ -478,7 +478,9 @@ main {
   display: block;
   max-width: 100%;
   height: auto;
+  margin-block: var(--s4);
   border: 1px solid var(--rule);
+  background: #ebe7dd; /* tinted placeholder while a lazy screenshot loads */
 }
 
 .prose blockquote {
@@ -499,7 +501,46 @@ main {
   padding-left: 1.4em;
 }
 .prose li + li {
-  margin-top: var(--s2);
+  margin-top: var(--s3);
+}
+.prose li > ul,
+.prose li > ol {
+  margin-block: var(--s3) 0;
+}
+.prose li > p {
+  margin-block: 0 var(--s3);
+}
+/* a bullet that is just a screenshot (optionally with its caption): no marker, full width */
+.prose li:has(> img:only-child),
+.prose li:has(> p:only-child > img:only-child),
+.prose li:has(> img:first-child + .caption),
+.prose li:has(> p:first-child > img:first-child + .caption) {
+  list-style: none;
+  margin-left: -1.4em;
+}
+
+/* explanation under a screenshot */
+.prose .caption {
+  display: block;
+  margin: calc(-1 * var(--s2)) 0 var(--s2);
+  padding-left: var(--s3);
+  border-left: 2px solid var(--rule);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.prose .caption code {
+  font-size: 0.82em;
+}
+/* breathing room for code blocks and notes inside lists */
+.prose li .code,
+.prose li > pre,
+.prose li .note,
+.prose li details {
+  margin-block: var(--s4);
+}
+.prose .code + .code {
+  margin-top: var(--s4);
 }
 .prose li::marker {
   font-family: var(--mono);

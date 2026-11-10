@@ -36,6 +36,7 @@ PORT     STATE SERVICE      VERSION
     - ![image](./img-02.png)
 - Can we login as null?
     - ![image](./img-03.png)
+      <span class="caption">Null authentication is accepted (`Null Auth:True`), but listing shares is denied, so the next try is a guest/anonymous login instead. The banner also confirms Windows Server 2022, domain `support.htb`, with SMB signing on.</span>
 - hmm ok, also can't see the shares, but we can try anonymous login
     - ![image](./img-04.png)
 - We can see the share `support-tools`, which is not normally in a windows DC
@@ -60,6 +61,7 @@ PORT     STATE SERVICE      VERSION
 - We can READ the 4 shares, but if we have the ldap account we might just run `ApacheDirectoryStudio` to enumerate AD
     - ![image](./img-13.png)
     - ![image](./img-14.png)
+      <span class="caption">Binding to LDAP in Apache Directory Studio as `ldap@support.htb`, using the password recovered from UserInfo.exe's traffic.</span>
 - Then we can see all the users/machines
     - ![image](./img-15.png)
 - In the `support` CN, we can see
@@ -69,11 +71,19 @@ PORT     STATE SERVICE      VERSION
     - ![image](./img-17.png)
 ## Root Flag
 - Let's first add `dc.support.htb` to our hosts file lest bloodhound fails
-- then, we can run bloodhound due to we already have a foothold: `bloodhound-ce-python -d support.htb -u support -p 'Ironside47pleasure40Watchful' -ns 10.129.60.39 -dc dc.support.htb -c All --zip
-`
+- then, we can run bloodhound due to we already have a foothold:
+
+    ```bash
+    bloodhound-ce-python -d support.htb -u support -p 'Ironside47pleasure40Watchful' -ns 10.129.60.39 -dc dc.support.htb -c All --zip
+    ```
+
 - Then, fire up a container that hosts this zip file
-`curl -L https://ghst.ly/getbhce -o docker-compose.yml \
-sudo docker compose up -d`
+
+    ```bash
+    curl -L https://ghst.ly/getbhce -o docker-compose.yml
+    sudo docker compose up -d
+    ```
+
 - Then visit `localhost:8080` to view the topology by loggin in as `admin:WHQs1imL4lq11Ghh5vly90EXiIjwoRcw`, the password can be found using `sudo docker compose logs bloodhound | grep -i "initial password"`, or just dont let it run in background
 - Then just upload the zip file and we can start exploring
 - First search for `support` -> Start from the account we have access to
@@ -97,6 +107,7 @@ sudo docker compose up -d`
 - ![image](./img-25.png)
 - We have pwned this box!
 - ![image](./img-26.png)
+  <span class="caption">Support solved.</span>
 > Conclusion: We had a low-priv acc called `support`, we discover that the group it is in has GenericAll on its domain -> can rewrite attributes, where we want to rewrite a specific attr called: `AllowedToActOnBehalfOfOtherIdentity`, if we do so, we can let the DC trust our malicious computer that impersonates as admin
 > 
 > - `addcomputer`—   need a machine account to be the “trusted” party, so you make one (ATTACK). (The feature only works machine-account → machine-account, which is why can’t just use support directly.)

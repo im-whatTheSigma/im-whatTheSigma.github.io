@@ -28,6 +28,7 @@ order: 3
     - Seems like a web service is on, let's add to `/etc/hosts` and visit
 - We see this:
     - ![image](./img-02.png)
+      <span class="caption">The intake portal describes its own stack: an RFC 1179 (LPD) print queue named `archive_intake`, handled by `paperwork-archive-v1.02`, the archive we download and read next.</span>
 - We can download the `paperwork-archive-v1.02` and extract to see that there is a `server.py` file for us to analyze
 - We see that the server serves a LPD service (old Unix printing service), and we can interact via port 1515 (not by browser), which it is obvious that command injection might be able to be achieved in this line:
     - ![image](./img-03.png)
@@ -102,6 +103,7 @@ python3 /tmp/putkey.py
     - But first I want to note how this script is written:
         - The UEL (Universal Exit Language)
             - ![image](./img-08.png)
+              <span class="caption">PJL's Universal Exit Language sequence is `<ESC>%-12345X`. In Python that's `b"\x1b%-12345X"`, which wraps every PJL job the scripts send.</span>
             - Where ESC here is just \x1b in hex
         - rb"0:..."
             - r is raw string, so it wont get escaped by Python
@@ -117,6 +119,7 @@ python3 /tmp/putkey.py
 - We can see there is `root        1489  0.0  0.4  28432 17980 ?        Ss   14:25   0:00 /usr/bin/python3 /usr/bin/paperwork-daemon` that is pretty suspicious that is run by root
 - Let's `cat` it:
     - ![image](./img-09.png)
+      <span class="caption">The `paperwork-daemon` source. When `scan_for_malice()` finds an FS command in the log, `trigger_lockdown()` replies with two open file descriptors attached via `SCM_RIGHTS`: the log and `admin_fd`, which holds `ADMIN_PASSWORD`. `leak.py` reads that second descriptor.</span>
 - We see a bunch of useful info, this seems like it wants us to connect to its socket, and try to dump the admin password. Already see that the socket_path is there, so let's try to `nc` to it!
 - `nc -U /run/paperwork/mgmt.sock` but there is no `nc` ;-;
 - Let's use another `socat - UNIX-CONNECT:/run/paperwork/mgmt.sock` and this works, but it replies:

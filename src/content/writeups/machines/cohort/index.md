@@ -42,6 +42,7 @@ PORT    STATE SERVICE VERSION
 - Trying default passwords do not work, maybe we can try bruteforcing but not ideal, let's see if any CVEs can be exploited:
     - First get the version
     - ![image](./img-05.png)
+      <span class="caption">The notebook's `/api/version` endpoint answers without logging in: marimo 0.20.4. That version string is what the advisory search below is based on.</span>
 - Google `marimo CVE 0.20.4` we easily find https://github.com/advisories/GHSA-2679-6mx9-h9xc
 - Let us try using the PoC, however it does not immediately work (the form is right but just something needs to be changed)
 ```python

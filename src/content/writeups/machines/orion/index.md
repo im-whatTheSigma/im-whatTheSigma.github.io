@@ -38,11 +38,13 @@ order: 1
     - `find / -name ".env" 2>/dev/null`
     - .env shows some stuff
         - ![image](./img-05.png)
+          <span class="caption">As `www-data`, `/var/www/html/craft/.env` is readable and holds the database settings: database `orion`, user `root`, and its password in plaintext.</span>
 - See that it is in mysql, so we try
     - `mysql -u root -p orion` (login as root, specify the orion db)
     - it prompts for password, and we have it
 - `select * from users;`
     - ![image](./img-06.png)
+      <span class="caption">The `users` table: `adam@orion.htb` with a `$2y$` bcrypt-family hash, which is what hashcat cracks next.</span>
 - This is obvious that it wants us to crack `adam` password, so we do
     - `hashcat -m 30600 hash.txt /usr/share/wordlists/rockyou.txt`
     - Note: don't run this in VM, too slow!

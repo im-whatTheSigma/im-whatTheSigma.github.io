@@ -7,7 +7,7 @@ tags: ["shellbags","registry","eric-zimmerman","collection","exfiltration"]
 order: 2
 ---
 
-> What Are Shellbags?
+> **What Are Shellbags?**\
 Shellbags are Windows registry artifacts that record a user's folder navigation history in Windows Explorer. Every time a user opens a folder - whether local, on a network share, or inside a zip archive - Windows stores metadata about that interaction in the registry.
 ## T1: What was the name of the archive file downloaded by the compromised account?
 - Using Eric Zimmerman's shellbag explorer, we can open the .dat file of steve and see that 

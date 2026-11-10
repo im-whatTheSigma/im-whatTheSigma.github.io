@@ -65,7 +65,11 @@ export function splitFrontMatter(raw) {
 /** Is this line a code fence? Returns the fence run (``` or ~~~) and the info string. */
 export function fenceOf(line) {
   const f = line.match(/^\s*(`{3,}|~{3,})(.*)$/);
-  return f ? { run: f[1], info: f[2] } : null;
+  if (!f) return null;
+  // CommonMark: a backtick fence's info string can't contain backticks, so
+  // "```some text```" on one line is inline code, not a fence.
+  if (f[1][0] === '`' && f[2].includes('`')) return null;
+  return { run: f[1], info: f[2] };
 }
 
 /**

@@ -32,8 +32,12 @@ PORT     STATE SERVICE       VERSION
     - ![image](./img-03.png)
 - However, if we look at the network interface:
     - ![image](./img-04.png)
-> 6: wlan2: ... link/ether 02:00:00:00:02:00
-7: wlan3: ... link/ether 02:00:00:00:03:00
+
+    ```
+    6: wlan2: ... link/ether 02:00:00:00:02:00
+    7: wlan3: ... link/ether 02:00:00:00:03:00
+    ```
+
 - We have virtual wifi adapters, maybe there are wifi hotspots to connect to, and gain a new ip?
     - ![image](./img-05.png)
 - Ok, let's somehow connect to this `HTB International WiFi`
@@ -43,15 +47,20 @@ PORT     STATE SERVICE       VERSION
 - ![image](./img-06.png)
     - If we go and sniff `wlan2` we only see ourselves talking, so it might be useless
 - Let's add a listener and sniff on all channels
-> ip link set wlan3 down
-iw dev mon0 del 2>/dev/null
-iw phy phy3 interface add mon0 type monitor
-ip link set mon0 up
-iw dev mon0 set channel 6
-iw dev mon0 info
+
+    ```bash
+    ip link set wlan3 down
+    iw dev mon0 del 2>/dev/null
+    iw phy phy3 interface add mon0 type monitor
+    ip link set mon0 up
+    iw dev mon0 set channel 6
+    iw dev mon0 info
+    ```
+
 - Now in wireshark we choose `mon0`
     - if we listen to `http`
         - ![image](./img-07.png)
+          <span class="caption">Filtering the `mon0` capture for `http` shows a cleartext `POST /miles/login.php` to `portal.international.htb`. The form fields at the bottom carry jenny's username and password.</span>
 - We have a set of creds, indeed can login
     - ![image](./img-08.png)
 - But it seems we also can't do anythin now, and this set can also not be used in ssh login
@@ -62,6 +71,7 @@ iw dev mon0 info
     - ![image](./img-10.png)
 - Let's try jennys creds
     - ![image](./img-11.png)
+      <span class="caption">jenny's sniffed credentials open the Craft CMS admin dashboard, and the footer gives the version away: Craft CMS 5.9.8.</span>
 - We are in!
     - But it seems we can't do anything at first, we do have the version `5.9.8` and there exists 2 CVEs to use, but ill try using another vector:
 - We could dump the db backup from the settings, and after reading it
@@ -92,6 +102,7 @@ aporter@portal:~$ cups-config --version
 - hmm, lucky me
     - https://github.com/predyy/CVE-2026-34990
 - ![image](./img-19.png)
+  <span class="caption">Root flag accepted: Layover solved on 29 Sep 2026.</span>
 
 ## Remediation
 

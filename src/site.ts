@@ -1,6 +1,6 @@
 // Everything personal lives here. Replace the bracketed placeholders.
 export const site = {
-  handle: "whathesigma's blogs",
+  handle: "whatTheSigma's blogs",
   intro:
     'IM student and SOC analyst intern by day, Hack The Box at night. Writeups of the machines, Sherlocks and challenges I solve, with notes on how each attack could have been stopped.',
   github: 'https://github.com/im-whatTheSigma', // leave empty to hide the nav link

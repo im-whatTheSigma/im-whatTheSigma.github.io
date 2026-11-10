@@ -27,6 +27,7 @@ PORT     STATE SERVICE VERSION
 - We see that for port 3000 it is open and can establish HTTP requests, so we also first do mapping in `/etc/hosts` and connect to `[ip]:3000` (note that we do not use the open SSH port because we have no creds)
 - There is a webpage:
     - ![image](./img-02.png)
+      <span class="caption">The ReactorWatch dashboard is a static monitoring page with nothing to click or submit, which is why I fingerprinted the framework instead of looking for inputs.</span>
 - We also want to run gobuster on here to keep enumerating:
     - `gobuster dir -u http://10.129.17.63:3000 -w /usr/share/wordlists/dirb/common.txt` But nothing useful shows
 - The website looks like it is written in react, where we can use f12 to check. After fingerprinting, we know that the backend is of Next.js 15.0.3, which is vulnerable to React2Shell (and this is the choice too because React2Shell is so powerful that we do not need any authentication, the web also does not have any interactable parts)
@@ -38,6 +39,7 @@ PORT     STATE SERVICE VERSION
 - This is an extremely bad hash of md5, and pasting it to crackstation easily shows the plaintext: `reactor1`, thus we can use this for ssh login (note that shell login as engineer@reactor1 just stucks there)
 - Login:
     - ![image](./img-06.png)
+      <span class="caption">SSH in as `engineer` with the cracked password; the user flag is in the home directory.</span>
 
 ## Root Flag
 - First, we try `sudo -l` -> does not work
@@ -45,6 +47,7 @@ PORT     STATE SERVICE VERSION
 - We need this mindset for all boxes: **is there a process running as root that's listening on a localhost-only port?** -> **This is incredibly important because from the dev's mindset, it is running from inside localhost, which "should" be untouchable**, so we do `ps aux` and try to find
     - Interesting find:
     - ![image](./img-07.png)
+      <span class="caption">In `ps aux`, the Next.js app runs as `node`, but `/opt/uptime-monitor/worker.js` runs as root with `--inspect=127.0.0.1:9229`: a Node debugger that any local user can attach to.</span>
 - It is a debugger, and if we can talk to this websocket we can run JS as root!
 - try `node inspect 127.0.0.1:9229`
     - We are in the debugger window 

