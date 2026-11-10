@@ -3,7 +3,7 @@ export const site = {
   handle: "whatTheSigma's blogs",
   intro:
     'IM student and SOC analyst intern by day, Hack The Box at night. Writeups of the machines, Sherlocks and challenges I solve, with notes on how each attack could have been stopped.',
-  github: 'https://github.com/im-whatTheSigma', // leave empty to hide the nav link
+  github: '', // set a URL to also show GitHub in the top nav; it's listed under Contact on the About page
 };
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
