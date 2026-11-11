@@ -1,0 +1,125 @@
+---
+// A faint, slowly drifting field of 亂碼 (mojibake) and hex bytes behind the page.
+// Pure decoration: hidden from assistive tech, paused when the tab is hidden,
+// and drawn once as a still frame for visitors who prefer reduced motion.
+---
+
+<canvas class="garble" aria-hidden="true"></canvas>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('canvas.garble');
+  const ctx = canvas?.getContext('2d');
+
+  if (canvas && ctx) {
+    // classic mojibake: UTF-8 read as Latin-1/CP1252, GBK "锟斤拷", MSVC "烫烫烫"/"屯屯屯", U+FFFD
+    const MOJIBAKE = [
+      '锟', '斤', '拷', '烫', '屯', '葺', '鍙', '鐨', '閿', '欒', '瑕', '娴',
+      'Ã', 'Â', 'â', '€', '™', 'œ', 'ï', '¿', '½', 'Ã©', 'â€™', 'ï¿½', '�',
+      'æ', 'ç', 'è', 'ã', '‚', 'ƒ', '¤', '¦', '§', 'Ð', 'Ñ', '¾',
+    ];
+    const HEX = '0123456789abcdef';
+    const glyph = () =>
+      Math.random() < 0.55
+        ? MOJIBAKE[(Math.random() * MOJIBAKE.length) | 0]
+        : HEX[(Math.random() * 16) | 0] + HEX[(Math.random() * 16) | 0];
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const SIZE = 14; // px, glyph size
+    const STEP = 30; // px between columns
+    const TRAIL = 14; // glyphs per falling column
+    const FPS = 24;
+
+    type Drop = { x: number; y: number; speed: number; chars: string[]; alpha: number };
+    let drops: Drop[] = [];
+    let w = 0;
+    let h = 0;
+
+    function makeDrop(x: number, scatter: boolean): Drop {
+      return {
+        x,
+        y: scatter ? Math.random() * (h + TRAIL * SIZE) : -Math.random() * h * 0.6,
+        speed: 8 + Math.random() * 22, // px per second: slow drift
+        chars: Array.from({ length: TRAIL }, glyph),
+        alpha: 0.05 + Math.random() * 0.06, // half-transparent, shallow
+      };
+    }
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas!.width = Math.round(w * dpr);
+      canvas!.height = Math.round(h * dpr);
+      canvas!.style.width = w + 'px';
+      canvas!.style.height = h + 'px';
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx!.font = `${SIZE}px 'JetBrains Mono Variable', ui-monospace, 'Noto Sans TC', 'Microsoft JhengHei', monospace`;
+      ctx!.textAlign = 'center';
+      ctx!.textBaseline = 'top';
+      const cols = Math.ceil(w / STEP);
+      // roughly two of every three columns carry a drop, so it never reads as a wall
+      drops = [];
+      for (let i = 0; i < cols; i++) if (Math.random() < 0.66) drops.push(makeDrop(i * STEP + STEP / 2, true));
+    }
+
+    function draw() {
+      ctx!.clearRect(0, 0, w, h);
+      for (const d of drops) {
+        for (let k = 0; k < TRAIL; k++) {
+          const y = d.y - k * (SIZE + 6);
+          if (y < -SIZE || y > h) continue;
+          // head is the strongest and sometimes picks up the site's green; the tail fades out
+          const fade = 1 - k / TRAIL;
+          ctx!.fillStyle =
+            k === 0
+              ? `rgba(18, 112, 58, ${(d.alpha * 1.6).toFixed(3)})`
+              : `rgba(27, 32, 27, ${(d.alpha * fade).toFixed(3)})`;
+          ctx!.fillText(d.chars[k], d.x, y);
+        }
+      }
+    }
+
+    let last = 0;
+    let raf = 0;
+    function tick(now: number) {
+      raf = requestAnimationFrame(tick);
+      if (now - last < 1000 / FPS) return;
+      const dt = Math.min((now - last) / 1000, 0.25);
+      last = now;
+      for (const d of drops) {
+        d.y += d.speed * dt;
+        // flicker: a glyph occasionally re-garbles itself
+        if (Math.random() < 0.08) d.chars[(Math.random() * TRAIL) | 0] = glyph();
+        if (d.y - TRAIL * (SIZE + 6) > h) Object.assign(d, makeDrop(d.x, false));
+      }
+      draw();
+    }
+
+    function start() {
+      cancelAnimationFrame(raf);
+      if (reduce.matches || document.hidden) {
+        draw(); // still frame
+        return;
+      }
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    }
+
+    let resizeTimer = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        resize();
+        start();
+      }, 150);
+    });
+    document.addEventListener('visibilitychange', start);
+    reduce.addEventListener('change', start);
+
+    // wait for the mono font so the first frame isn't drawn in a fallback face
+    (document.fonts?.ready ?? Promise.resolve()).then(() => {
+      resize();
+      start();
+    });
+  }
+</script>
