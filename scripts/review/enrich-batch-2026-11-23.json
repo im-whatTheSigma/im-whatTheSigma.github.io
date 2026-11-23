@@ -1,0 +1,52 @@
+{
+  "machines/principal": {
+    "publish": true,
+    "os": "Linux",
+    "summary": "A token-validation flaw in pac4j-jwt and client-side code that reveals the login scheme get past the dashboard, which exposes a service account's SSH credentials; a group-readable SSH certificate-authority key then lets that account sign its own certificate for root.",
+    "tags": ["pac4j", "jwt", "jwe", "api", "ssh-certificates", "ssh-ca"],
+    "remediation": "## Remediation\n\n- **Patch pac4j-jwt.** The way in was a known token-validation flaw in pac4j-jwt 6.0.3. Upgrade it, and treat the public key as public: the server's security must never depend on that key staying secret.\n- **Don't let the client decide who is logged in.** `app.js` showed that a value in `sessionStorage` was enough for the front end to treat us as authenticated. Every API call must be authorised on the server, whatever the browser claims.\n- **Keep secrets out of dashboards.** The `svc_deploy` credential was readable in the dashboard. Store deployment secrets in a vault and show only references to them.\n- **Protect the SSH CA key like a root password.** The `deployers` group could read the private key of the SSH certificate authority under `/opt/principal/ssh`, and that key can mint a certificate for any user, including root. It should be readable only by root (or kept offline or in an HSM), with `AuthorizedPrincipalsFile` limiting which principals each certificate may log in as.\n\n### References\n\n- [OWASP — JSON Web Token Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html)\n- [ssh-keygen(1) — certificates](https://man.openbsd.org/ssh-keygen#CERTIFICATES)\n- [sshd_config(5) — AuthorizedPrincipalsFile](https://man.openbsd.org/sshd_config#AuthorizedPrincipalsFile)"
+  },
+  "machines/helix": {
+    "publish": true,
+    "os": "Linux",
+    "summary": "An Apache NiFi 1.21.0 instance on a subdomain gives a foothold and an SSH key for the operator account; root comes from an internal OPC UA industrial-control service whose maintenance mode and process values can be written without authentication.",
+    "tags": ["apache-nifi", "subdomain-enum", "ssh-keys", "opc-ua", "ics", "pdf-cracking"],
+    "remediation": "## Remediation\n\n- **Patch NiFi and put it behind authentication.** The foothold came from a known flaw in NiFi 1.21.0 on `flow.helix.htb`. Upgrade, require login (NiFi supports TLS client certificates, LDAP or OIDC), and don't expose the UI on a public vhost.\n- **No private keys lying around.** The shell found an SSH key for `operator`. Keys belong in the owning user's `~/.ssh` with `0600` permissions, ideally with a passphrase.\n- **Weak document passwords don't protect anything.** The procedures PDF opened with `operator1`; anything that sensitive needs a strong, unique password or shouldn't sit on the box at all.\n- **Secure the OPC UA server.** Root came from writing `MAINTENANCE`, `TestOverride` and `CalibrationOffset` to an OPC UA endpoint that accepted anonymous writes. Disable anonymous access, require signed and encrypted sessions with user authentication, and restrict write access on safety-relevant nodes. A maintenance window that grants privileged access should need a separate approval, not just a temperature reading.\n\n### References\n\n- [Apache NiFi — security configuration](https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_configuration)\n- [OPC Foundation — security bulletins](https://opcfoundation.org/security-bulletins/)\n- [CISA — ICS recommended practices](https://www.cisa.gov/topics/industrial-control-systems)"
+  },
+  "machines/devhub": {
+    "publish": true,
+    "os": "Linux",
+    "date": "2026-09-20",
+    "summary": "An internet-reachable MCP Inspector with a known vulnerability gives a low-privilege shell; a Jupyter token visible in the process list leads to the user, and an internal key-management API on port 5000 hands out the root SSH key.",
+    "tags": ["mcp-inspector", "jupyter", "token-leak", "ssh-keys", "internal-api"],
+    "remediation": "## Remediation\n\n- **Never expose developer tools like the MCP Inspector.** It's meant to run on localhost while you debug an MCP server. Bind it to `127.0.0.1`, require its session token, and keep it patched; reachable on port 6274, it was a direct way in.\n- **Don't put secrets on the command line.** The Jupyter token showed up in `ps -ef` for any local user. Configure Jupyter through a config file or environment with tight permissions instead of passing `--token` as an argument.\n- **Authenticate internal APIs too.** The service on port 5000 handed out private keys to anyone who could reach it from the box. \"Only listening on localhost\" isn't access control: require authentication and per-caller authorisation, and never let it return root's key.\n- **Keep configuration secrets out of readable files.** The keys and passwords we found in plain files should live in a secrets manager.\n\n### References\n\n- [Jupyter Server — security in the Jupyter server](https://jupyter-server.readthedocs.io/en/latest/operators/security.html)\n- [Model Context Protocol — security best practices](https://modelcontextprotocol.io/specification/draft/basic/security_best_practices)\n- [CWE-214 — invocation of process using visible sensitive information](https://cwe.mitre.org/data/definitions/214.html)"
+  },
+  "machines/doubletake": {
+    "publish": true,
+    "os": "Linux",
+    "summary": "An OpenSSH authentication bypass gets a foothold, Firefox's saved logins only base64-encode bob's password (which he reused for SSH), and a Docker daemon vulnerability that runs the container's own decompressor as host root gives root.",
+    "tags": ["openssh", "auth-bypass", "firefox-logins", "password-reuse", "docker", "container-escape"],
+    "remediation": "## Remediation\n\n- **Patch OpenSSH.** The foothold was an authentication bypass in the installed OpenSSH version. Upgrade it, and don't expose SSH more widely than it needs to be.\n- **Saved browser passwords need a primary password.** Without a Firefox primary password, `logins.json` is only obfuscated, so anyone who can read the profile can recover the logins. Set a primary password or use a real password manager.\n- **No password reuse.** bob's web password also worked for SSH.\n- **Patch Docker, and treat access to the daemon as root.** Root came from a Docker Engine 29.5.0 flaw in which the daemon ran the container's decompressor as host root. Upgrade, and remember that anyone who can reach the Docker API (here through the dashboard's upload feature) effectively has root; run rootless Docker where possible.\n\n### References\n\n- [OpenSSH — security advisories](https://www.openssh.com/security.html)\n- [Docker — Docker Engine security](https://docs.docker.com/engine/security/)\n- [Docker — rootless mode](https://docs.docker.com/engine/security/rootless/)\n- [Mozilla — use a primary password to protect stored logins](https://support.mozilla.org/en-US/kb/use-primary-password-protect-stored-logins)"
+  },
+  "machines/fireflow": {
+    "publish": false,
+    "os": "Linux",
+    "summary": "Langflow on a subdomain, a .env password and a user named nightfall. Root section not written yet."
+  },
+  "machines/redeye": {
+    "publish": false,
+    "os": "Linux",
+    "summary": "GeoNetwork 4.4.11 on geo.airways.htb. Writeup in progress."
+  },
+  "challenges/pwn/lastcall": {
+    "publish": false,
+    "summary": "A fully hardened binary. Writeup in progress."
+  },
+  "challenges/pwn/tictactoed": {
+    "publish": false,
+    "summary": "A Rust tic-tac-toe binary whose win check hides a regex-gated code path. Not finished yet.",
+    "tags": ["pwn", "rust", "ghidra"]
+  },
+  "machines/bedside": { "publish": false, "summary": "Writeup not written up yet." },
+  "sherlocks/camouflage": { "publish": false, "summary": "Writeup not written up yet." }
+}

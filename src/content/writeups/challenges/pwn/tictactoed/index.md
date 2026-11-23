@@ -3,9 +3,11 @@ title: "TicTacToed"
 platform: "HTB"
 difficulty: "Medium"
 summary: "A Rust tic-tac-toe binary whose win check hides a regex-gated code path. Not finished yet."
-draft: true
 tags: ["pwn","rust","ghidra"]
-order: 6
+order: 7
+draft: true
+autosync: true
+sourceHash: "0db255e216d8ba97"
 ---
 
 - Some basic checks

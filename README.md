@@ -53,3 +53,27 @@ draft: false         # true = visible in dev only
 3. Repo → Settings → Pages → Source: **GitHub Actions**.
 
 `.github/workflows/deploy.yml` builds and publishes on every push.
+
+## Automatic sync from HackMD
+
+The blog syncs from the HackMD notes listed in `scripts/sources.json`.
+
+1. **Every night at 02:00 (Taiwan)** the *Sync from HackMD* workflow runs `npm run sync`.
+   New writeups arrive as hidden drafts marked `pending: true`. Published posts are never touched.
+   Drafts marked `autosync: true` are re-imported when their HackMD section changes.
+   Run it any time from the repo's **Actions → Sync from HackMD → Run workflow**.
+2. **Every day at about 10:00** a scheduled Claude task (in the Claude desktop app) pulls the repo,
+   reviews each pending draft, adds summary, difficulty, remediation and captions, publishes the
+   finished ones, and pushes. Unfinished writeups stay hidden until you finish them in HackMD.
+   It runs only while the app is open; if it was closed at 10:00 it runs on next launch.
+
+By hand, the same flow is:
+
+```bash
+npm run sync                       # import new writeups as drafts
+node scripts/review/weak-images.mjs machines/<box>       # screenshots needing captions
+node scripts/review/add-captions.mjs captions.json      # add captions
+node scripts/review/apply-review.mjs scripts/review/enrich-batch-<date>.json  # enrich + publish
+```
+
+To add a new HackMD note, add an entry to `scripts/sources.json` (its `level` is the heading depth each writeup starts at). Notes must be readable by Everyone.

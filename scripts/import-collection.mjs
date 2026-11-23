@@ -11,19 +11,27 @@
 // A title like "Touch (some remark)" becomes the title "Touch"; the remark is kept as the
 // first line of the post. Writeups that already exist are SKIPPED, so it is safe to re-run
 // after adding a new box to the HackMD note: only the new one is imported.
+//
+// --draft        import new writeups hidden, marked `pending: true` (needs review) and
+//                `autosync: true` (refresh from HackMD while still a draft)
+// --difficulty   default difficulty when the note has no difficulty headings
+// IMPORTED=<file> env var: append the paths of imported posts to that file (used by sync)
 
-import { mkdir, writeFile, access } from 'node:fs/promises';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import {
   ROOT, OUT, parseArgs, load, splitFrontMatter, convert, localiseImages, slugify, frontMatter, fenceOf,
 } from './lib/hackmd.mjs';
 
-const { flags, positional } = parseArgs(process.argv.slice(2), ['force', 'dry']);
+const { flags, positional } = parseArgs(process.argv.slice(2), ['force', 'dry', 'draft']);
+const imported = [];
 const source = positional[0];
 const level = Number(flags.level);
 if (!source || !flags.section || !level) {
   console.error('usage: npm run import:collection -- <hackmd-url | file.md> --section <dir> --level <n>');
-  console.error('         [--platform HTB] [--season 12] [--only "Box name"] [--dry] [--force]');
+  console.error('         [--platform HTB] [--season 12] [--difficulty Medium] [--only "Box name"]');
+  console.error('         [--draft] [--dry] [--force]');
   process.exit(1);
 }
 
@@ -100,21 +108,40 @@ try {
     order++;
     if (flags.only && post.title.toLowerCase() !== flags.only.toLowerCase()) continue;
 
-    const slug = slugify(post.title);
-    const dir = path.join(OUT, ...flags.section.split('/'), slug);
+    // SLUG_ALIASES maps "section/imported-slug" to "section/existing-slug" for posts
+    // that were renamed by hand after the first import (so they aren't re-imported)
+    const aliases = JSON.parse(process.env.SLUG_ALIASES || '{}');
+    const target = aliases[`${flags.section}/${slugify(post.title)}`] ?? `${flags.section}/${slugify(post.title)}`;
+    const dir = path.join(OUT, ...target.split('/'));
     const file = path.join(dir, 'index.md');
     const rel = path.relative(ROOT, file);
-    const exists = await access(file).then(() => true, () => false);
-    if (exists && !flags.force) {
-      console.log(`- ${rel} exists, skipped`);
-      continue;
+    const raw = post.lines.join('\n');
+    const hash = createHash('sha256').update(post.title + '\n' + raw).digest('hex').slice(0, 16);
+
+    const existing = await readFile(file, 'utf8').catch(() => null);
+    if (existing !== null && !flags.force) {
+      // Published posts are never touched (they carry hand-made enrichment).
+      // Posts still marked `autosync: true` (drafts waiting on the author) are
+      // refreshed when their HackMD section changes.
+      const fm = existing.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
+      const autosync = /^autosync:\s*true\s*$/m.test(fm);
+      const oldHash = fm.match(/^sourceHash:\s*"?([0-9a-f]+)"?\s*$/m)?.[1];
+      if (!autosync) {
+        console.log(`- ${rel} exists, skipped`);
+        continue;
+      }
+      if (oldHash === hash) {
+        console.log(`- ${rel} draft unchanged in HackMD, skipped`);
+        continue;
+      }
+      console.log(`↻ ${rel} changed in HackMD, re-importing`);
     }
     if (flags.dry) {
-      console.log(`would write ${rel}  [${post.difficulty ?? 'no difficulty'}]`);
+      console.log(`would write ${rel}  [${post.difficulty ?? flags.difficulty ?? 'no difficulty'}]`);
       continue;
     }
 
-    let { body, tags } = convert(post.lines.join('\n'), { extractTitle: false });
+    let { body, tags } = convert(raw, { extractTitle: false });
     body = normaliseHeadings(body);
     if (post.remark) body = `*(${post.remark})*\n\n` + body;
 
@@ -124,12 +151,22 @@ try {
       ['title', post.title],
       ['platform', flags.platform ?? 'HTB'],
       ['season', flags.season && Number(flags.season)],
-      ['difficulty', post.difficulty],
+      ['difficulty', post.difficulty ?? flags.difficulty],
       ['tags', tags],
       ['order', order],
+      // --draft: arrive hidden and flagged for review (see scripts/sync.mjs)
+      ['draft', !!flags.draft],
+      ['pending', !!flags.draft],
+      ['autosync', !!flags.draft],
+      ['sourceHash', flags.draft ? hash : undefined],
     ]);
     await writeFile(file, front + images.body);
-    console.log(`✓ ${rel}  (${images.count} image${images.count === 1 ? '' : 's'})`);
+    console.log(`✓ ${rel}  (${images.count} image${images.count === 1 ? '' : 's'}${flags.draft ? ', draft' : ''})`);
+    imported.push(rel.replace(/\\/g, '/'));
+  }
+  if (process.env.IMPORTED && imported.length) {
+    const { appendFile } = await import('node:fs/promises');
+    await appendFile(process.env.IMPORTED, imported.join('\n') + '\n');
   }
 } catch (err) {
   console.error(`✗ ${err.message}`);

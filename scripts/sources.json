@@ -1,0 +1,21 @@
+{
+  "$comment": "HackMD notes the blog syncs from. Each note holds many writeups; `level` is the heading depth each writeup starts at. Notes must be readable by Everyone.",
+  "notes": [
+    { "name": "HTB Season 12", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/SyjAf-LcMg", "section": "machines", "level": 1, "season": 12 },
+    { "name": "HTB Season 11", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/Hy6f81nzzg", "section": "machines", "level": 2, "season": 11 },
+    { "name": "Very Easy / Easy machines", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/HJm6ERdGMl", "section": "machines", "level": 3 },
+    { "name": "Medium machines", "url": "https://hackmd.io/crTQ5uE-Tu6m2HtJTgNM3g", "section": "machines", "level": 1, "difficulty": "Medium" },
+    { "name": "Sherlocks", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/Bk0Sy4zMMl", "section": "sherlocks", "level": 3 },
+    { "name": "Pwn challenges", "url": "https://hackmd.io/92k0zrUaRxKwffY906s7sQ", "section": "challenges/pwn", "level": 2 },
+    { "name": "Crypto challenges", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/rk1Fd01MGg", "section": "challenges/crypto", "level": 4 },
+    { "name": "Reverse challenges", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/HynKCHMGfe", "section": "challenges/reverse", "level": 3 },
+    { "name": "Web challenges", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/SJSsaHGMze", "section": "challenges/web", "level": 4 },
+    { "name": "Forensics challenges", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/HJd3XliOfl", "section": "challenges/forensics", "level": 2 },
+    { "name": "Coding challenges", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/Hyr0CSfGzx", "section": "challenges/coding", "level": 4 },
+    { "name": "OSINT challenges", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/BkeTQUGGMl", "section": "challenges/osint", "level": 4 },
+    { "name": "Misc challenges", "url": "https://hackmd.io/@XKYx-ovpSgijLeYs1Nbv3Q/H1Ds0HMMfe", "section": "challenges/misc", "level": 4 }
+  ],
+  "aliases": {
+    "challenges/web/spookifier-ssti-in-mako": "challenges/web/spookifier"
+  }
+}
