@@ -58,6 +58,39 @@ draft: false         # true = visible in dev only
 
 The blog syncs from the HackMD notes listed in `scripts/sources.json`.
 
+```mermaid
+flowchart TD
+    hackmd["HackMD notes<br/>13 public notes"]
+    sync["Sync bot<br/>GitHub Actions: Sync from HackMD<br/>nightly 02:00 Taiwan time"]
+    repo[("Git repo, branch main<br/>im-whatTheSigma.github.io")]
+    claude["Claude review task<br/>Claude desktop app, daily ~10:00"]
+    check{"Is the writeup finished?<br/>machine: user + root<br/>sherlock: tasks answered<br/>challenge: reaches the flag"}
+    publish["Publish<br/>add summary, difficulty, remediation, captions<br/>remove the draft header"]
+    keep["Keep as draft<br/>keep draft: true and autosync: true<br/>clear pending"]
+    build["npm run build must pass"]
+    push["git push to main"]
+    deploy["Deployment bot<br/>GitHub Actions: Deploy to GitHub Pages<br/>astro build, then upload to Pages"]
+    live(["im-whatthesigma.github.io<br/>only posts without draft: true"])
+
+    hackmd -->|new or changed writeups| sync
+    sync -->|commits them as hidden drafts<br/>draft + pending + autosync| repo
+    repo -->|git pull, then find pending: true| claude
+    claude --> check
+    check -->|yes| publish
+    check -->|no| keep
+    publish --> build
+    keep --> build
+    build --> push
+    push --> repo
+    push -->|a push to main triggers| deploy
+    deploy -->|drafts are left out of the build| live
+    hackmd -.->|you finish a draft later: it is re-imported and reviewed again| sync
+```
+
+- The sync bot's own commit never starts a deploy: GitHub doesn't let a workflow's commit trigger other workflows. Only a push from the review task (or from you) does.
+- Even when a deploy runs, posts with `draft: true` get no page, card or count on the live site. They stay visible in this public repo's files, though.
+- Published posts are never re-imported, so hand-added remediation and captions are safe.
+
 1. **Every night at 02:00 (Taiwan)** the *Sync from HackMD* workflow runs `npm run sync`.
    New writeups arrive as hidden drafts marked `pending: true`. Published posts are never touched.
    Drafts marked `autosync: true` are re-imported when their HackMD section changes.
