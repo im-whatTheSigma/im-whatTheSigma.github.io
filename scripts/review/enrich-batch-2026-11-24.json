@@ -1,6 +1,8 @@
 {
   "challenges/pwn/lastcall": {
-    "publish": false,
-    "summary": "A fully protected high-score cabinet binary whose view_slot lets slot 10 read past the 10-entry leaderboard and leak memory. Not finished yet."
+    "publish": true,
+    "date": "2026-11-23",
+    "summary": "An off-by-one bounds check in a fully protected leaderboard binary exposes a global struct as slot 10: reading it leaks a function pointer to defeat PIE, and writing it redirects that pointer to the vault function.",
+    "tags": ["pwn", "off-by-one", "pie-leak", "function-pointer-overwrite", "ghidra", "gdb", "pwntools"]
   }
 }
