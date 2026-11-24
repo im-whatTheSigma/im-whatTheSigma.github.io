@@ -2,10 +2,10 @@
 title: "Lastcall"
 platform: "HTB"
 difficulty: "Easy"
+summary: "A fully protected high-score cabinet binary whose view_slot lets slot 10 read past the 10-entry leaderboard and leak memory. Not finished yet."
 tags: []
 order: 5
 draft: true
-pending: true
 autosync: true
 sourceHash: "6131562780d85fa3"
 ---

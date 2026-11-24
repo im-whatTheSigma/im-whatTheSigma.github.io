@@ -1,0 +1,6 @@
+{
+  "challenges/pwn/lastcall": {
+    "publish": false,
+    "summary": "A fully protected high-score cabinet binary whose view_slot lets slot 10 read past the 10-entry leaderboard and leak memory. Not finished yet."
+  }
+}
